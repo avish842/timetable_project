@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-primary: #e8edf2;
+    --bg-secondary: #f7f9fb;
+    --bg-card: #ffffff;
+    --bg-hover: #e2e8f0;
+    --text-primary: #14243a;
+    --text-secondary: #4e6077;
+    --accent: #005b99;
+    --accent-hover: #004a7d;
+    --accent-strong: #00345a;
+    --accent-subtle: rgba(0, 91, 153, 0.12);
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --border: #c7d3df;
+    --radius-lg: 14px;
+    --radius-xl: 18px;
+    --shadow-soft: 0 10px 30px rgba(17, 39, 63, 0.08);
+    --shadow-focus: 0 0 0 3px rgba(0, 91, 153, 0.16);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    min-height: 100vh;
+    background:
+      linear-gradient(rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.62)),
+      repeating-linear-gradient(90deg, rgba(0, 91, 153, 0.04) 0 1px, transparent 1px 24px),
+      repeating-linear-gradient(0deg, rgba(0, 91, 153, 0.04) 0 1px, transparent 1px 24px),
+      linear-gradient(135deg, #eef3f8 0%, #e3e9f1 100%);
+    color: var(--text-primary);
+    font-family: var(--font-source-sans), "Segoe UI", system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    line-height: 1.5;
+  }
+
+  a,
+  button,
+  input,
+  select,
+  textarea {
+    transition: all 180ms ease;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    box-shadow: var(--shadow-focus);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-source-sans), "Segoe UI", system-ui, -apple-system, sans-serif;
+    letter-spacing: -0.02em;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #dce4ec;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #94a5b6;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #76889b;
+  }
+
+  main {
+    animation: page-enter 320ms ease-out;
+  }
+
+  @keyframes page-enter {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
