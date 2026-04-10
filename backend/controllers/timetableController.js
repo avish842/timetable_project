@@ -631,6 +631,82 @@ exports.importTimetableFromExcel = async (req, res, next) => {
 
     const populated = await Timetable.findById(timetable._id).populate("roomId", "name");
 
+    // ── Auto-send department emails ──────────────────────────────────
+    let emailResult = null;
+    if (updatedCount > 0) {
+      try {
+        const populatedTT = await Timetable.findById(timetable._id)
+          .populate("roomId", "name")
+          .populate("createdBy", "name email username");
+
+        const assignedSlots = await Slot.find({
+          timetableId: timetable._id,
+          departmentId: { $ne: null },
+        })
+          .populate("departmentId", "name email")
+          .sort({ day: 1, periodNumber: 1 });
+
+        if (assignedSlots.length > 0) {
+          const periodMeta = new Map(
+            (populatedTT.generatedPeriods || []).map((p) => [
+              p.periodNumber,
+              { startTime: p.startTime, endTime: p.endTime },
+            ])
+          );
+
+          const grouped = new Map();
+          for (const slot of assignedSlots) {
+            const dept = slot.departmentId;
+            if (!dept || !dept.email) continue;
+            const deptKey = String(dept._id);
+            if (!grouped.has(deptKey)) {
+              grouped.set(deptKey, {
+                departmentName: dept.name,
+                email: dept.email,
+                slotRows: [],
+              });
+            }
+            const period = periodMeta.get(slot.periodNumber) || {};
+            grouped.get(deptKey).slotRows.push({
+              day: slot.day,
+              periodNumber: slot.periodNumber,
+              startTime: period.startTime || "--:--",
+              endTime: period.endTime || "--:--",
+              subject: slot.subject || "",
+              teacher: slot.teacher || "",
+            });
+          }
+
+          const generatedBy =
+            populatedTT.createdBy?.username || populatedTT.createdBy?.name || "Timetable Admin";
+          const roomName = populatedTT.roomId?.name || "Room";
+
+          const sent = [];
+          const failed = [];
+
+          for (const item of grouped.values()) {
+            try {
+              await sendDepartmentTimetableEmail({
+                to: item.email,
+                departmentName: item.departmentName,
+                roomName,
+                slotRows: item.slotRows,
+                generatedBy,
+              });
+              sent.push(item.departmentName);
+            } catch (emailErr) {
+              console.error(`Auto-email failed for ${item.departmentName}:`, emailErr.message);
+              failed.push(item.departmentName);
+            }
+          }
+
+          emailResult = { sent, failed };
+        }
+      } catch (emailErr) {
+        console.error("Auto-email dispatch error:", emailErr.message);
+      }
+    }
+
     return res.status(201).json({
       success: true,
       message:
@@ -645,6 +721,7 @@ exports.importTimetableFromExcel = async (req, res, next) => {
         teacherConflictWarnings,
         skippedCellsCount,
         skippedCells,
+        emailResult,
       },
     });
   } catch (error) {

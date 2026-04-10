@@ -122,6 +122,34 @@ export default function TimetableBuilderPage() {
           `Imported ${summary?.slotsUpdated || 0} slots from ${summary?.rowsProcessed || 0} day rows`
         );
       }
+
+      // Show email notification toast
+      const emailResult = summary?.emailResult;
+      if (emailResult) {
+        const sentCount = emailResult.sent?.length || 0;
+        const failedCount = emailResult.failed?.length || 0;
+        if (sentCount > 0 && failedCount === 0) {
+          toast.success(
+            `📧 Emails sent to ${sentCount} department(s): ${emailResult.sent.join(", ")}`,
+            { duration: 5000 }
+          );
+        } else if (sentCount > 0 && failedCount > 0) {
+          toast.success(
+            `📧 Emails sent to ${sentCount} department(s): ${emailResult.sent.join(", ")}`,
+            { duration: 5000 }
+          );
+          toast.error(
+            `⚠️ Email failed for ${failedCount} department(s): ${emailResult.failed.join(", ")}`,
+            { duration: 6000 }
+          );
+        } else if (failedCount > 0) {
+          toast.error(
+            `⚠️ Email failed for all ${failedCount} department(s): ${emailResult.failed.join(", ")}`,
+            { duration: 6000 }
+          );
+        }
+      }
+
       router.push(`/timetable/${form.roomId}`);
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to import timetable");

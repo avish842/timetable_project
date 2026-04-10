@@ -14,6 +14,7 @@ const timetableRoutes = require("./routes/timetableRoutes");
 const slotRoutes = require("./routes/slotRoutes");
 const userRoutes = require("./routes/userRoutes");
 const swapRoutes = require("./routes/swapRoutes");
+const analyticsRoutes = require("./routes/analyticsRoutes");
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.use("/api/timetable", timetableRoutes);
 app.use("/api/slots", slotRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/swaps", swapRoutes);
+app.use("/api/analytics", analyticsRoutes);
 
 // Health check
 app.get("/api/health", (req, res) => {
